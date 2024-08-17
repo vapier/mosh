@@ -35,6 +35,7 @@
 
 #include "src/include/config.h"
 #include "terminaldisplay.h"
+#include "src/util/fatal_assert.h"
 
 #include <stdexcept>
 #include <string>
@@ -66,6 +67,7 @@ static bool ti_flag( const char* capname )
 {
   int val = tigetflag( const_cast<char*>( capname ) );
   if ( val == -1 ) {
+X();
     throw std::invalid_argument( std::string( "Invalid terminfo boolean capability " ) + capname );
   }
   return val;
@@ -75,6 +77,7 @@ static const char* ti_str( const char* capname )
 {
   const char* val = tigetstr( const_cast<char*>( capname ) );
   if ( val == (const char*)-1 ) {
+X();
     throw std::invalid_argument( std::string( "Invalid terminfo string capability " ) + capname );
   }
   return val;
@@ -90,15 +93,19 @@ Display::Display( bool use_environment )
     if ( ret != OK ) {
       switch ( errret ) {
         case 1:
+X();
           throw std::runtime_error( "Terminal is hardcopy and cannot be used by curses applications." );
           break;
         case 0:
+X();
           throw std::runtime_error( "Unknown terminal type." );
           break;
         case -1:
+X();
           throw std::runtime_error( "Terminfo database could not be found." );
           break;
         default:
+X();
           throw std::runtime_error( "Unknown terminfo error." );
           break;
       }

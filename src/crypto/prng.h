@@ -38,6 +38,7 @@
 
 #include <unistd.h>
 
+#include "src/util/fatal_assert.h"
 #include "src/crypto/crypto.h"
 
 /* Read random bytes from /dev/urandom.

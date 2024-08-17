@@ -33,6 +33,7 @@
 #include "src/include/config.h"
 
 #include "src/util/timestamp.h"
+#include "src/util/fatal_assert.h"
 
 #include <cerrno>
 
@@ -91,6 +92,7 @@ void freeze_timestamp( void )
     return;
   }
 #endif
+X();
 #if HAVE_MACH_ABSOLUTE_TIME
   // Monotonic, not adjusted after system sleep.  OS X 10.12 has
   // mach_continuous_time(), but also has clock_gettime().

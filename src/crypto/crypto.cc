@@ -55,6 +55,7 @@ long int myatoi( const char* str )
   long int ret = strtol( str, &end, 10 );
 
   if ( ( errno != 0 ) || ( end != str + strlen( str ) ) ) {
+_X("Bad integer: %s", str);
     throw CryptoException( "Bad integer." );
   }
 
@@ -66,6 +67,7 @@ uint64_t Crypto::unique( void )
   static uint64_t counter = 0;
   uint64_t rv = counter++;
   if ( counter == 0 ) {
+_X("Counter wrapped");
     throw CryptoException( "Counter wrapped", true );
   }
   return rv;
@@ -76,6 +78,7 @@ AlignedBuffer::AlignedBuffer( size_t len, const char* data ) : m_len( len ), m_a
   size_t alloc_len = len ? len : 1;
 #if defined( HAVE_POSIX_MEMALIGN )
   if ( ( 0 != posix_memalign( &m_allocated, 16, alloc_len ) ) || ( m_allocated == NULL ) ) {
+X();
     throw std::bad_alloc();
   }
   m_data = (char*)m_allocated;
@@ -85,6 +88,7 @@ AlignedBuffer::AlignedBuffer( size_t len, const char* data ) : m_len( len ), m_a
      the aligned offset within. */
   m_allocated = malloc( 15 + alloc_len );
   if ( m_allocated == NULL ) {
+X();
     throw std::bad_alloc();
   }
 
@@ -108,6 +112,7 @@ AlignedBuffer::AlignedBuffer( size_t len, const char* data ) : m_len( len ), m_a
 Base64Key::Base64Key( std::string printable_key )
 {
   if ( printable_key.length() != 22 ) {
+X();
     throw CryptoException( "Key must be 22 letters long." );
   }
 
@@ -115,15 +120,18 @@ Base64Key::Base64Key( std::string printable_key )
 
   size_t len = 16;
   if ( !base64_decode( base64.data(), 24, key, &len ) ) {
+X();
     throw CryptoException( "Key must be well-formed base64." );
   }
 
   if ( len != 16 ) {
+X();
     throw CryptoException( "Key must represent 16 octets." );
   }
 
   /* to catch changes after the first 128 bits */
   if ( printable_key != this->printable_key() ) {
+X();
     throw CryptoException( "Base64 key was not encoded 128-bit key." );
   }
 }
@@ -145,6 +153,7 @@ std::string Base64Key::printable_key( void ) const
   base64_encode( key, 16, base64, 24 );
 
   if ( ( base64[23] != '=' ) || ( base64[22] != '=' ) ) {
+X();
     throw CryptoException( std::string( "Unexpected output from base64_encode: " ) + std::string( base64, 24 ) );
   }
 
@@ -157,6 +166,7 @@ Session::Session( Base64Key s_key )
     plaintext_buffer( RECEIVE_MTU ), ciphertext_buffer( RECEIVE_MTU ), nonce_buffer( Nonce::NONCE_LEN )
 {
   if ( AE_SUCCESS != ae_init( ctx, key.data(), 16, 12, 16 ) ) {
+X();
     throw CryptoException( "Could not initialize AES-OCB context." );
   }
 }
@@ -184,6 +194,7 @@ uint64_t Nonce::val( void ) const
 Nonce::Nonce( const char* s_bytes, size_t len )
 {
   if ( len != 8 ) {
+X();
     throw CryptoException( "Nonce representation must be 8 octets long." );
   }
 
@@ -212,6 +223,7 @@ const std::string Session::encrypt( const Message& plaintext )
                       ciphertext_buffer.data(), /* ct */
                       NULL,                     /* tag */
                       AE_FINALIZE ) ) {         /* final */
+X();
     throw CryptoException( "ae_encrypt() returned error." );
   }
 
@@ -234,6 +246,7 @@ const std::string Session::encrypt( const Message& plaintext )
      client use the same key, so we actually need to die after 2^47 blocks.
   */
   if ( blocks_encrypted >> 47 ) {
+X();
     throw CryptoException( "Encrypted 2^47 blocks.", true );
   }
 
@@ -245,6 +258,7 @@ const std::string Session::encrypt( const Message& plaintext )
 const Message Session::decrypt( const char* str, size_t len )
 {
   if ( len < 24 ) {
+_X("Ciphertext must contain nonce and tag: len=%zu str={{{%s}}}", len, str);
     throw CryptoException( "Ciphertext must contain nonce and tag." );
   }
 
@@ -273,6 +287,7 @@ const Message Session::decrypt( const char* str, size_t len )
                       plaintext_buffer.data(),  /* pt */
                       NULL,                     /* tag */
                       AE_FINALIZE ) ) {         /* final */
+_X("Packet failed integrity check.");
     throw CryptoException( "Packet failed integrity check." );
   }
 

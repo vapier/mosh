@@ -133,6 +133,7 @@ public:
   void start_shutdown( void )
   {
     if ( !shutdown_in_progress ) {
+_X();
       shutdown_start = timestamp();
       shutdown_in_progress = true;
     }

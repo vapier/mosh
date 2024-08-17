@@ -150,6 +150,7 @@ void Connection::prune_sockets( void )
 Connection::Socket::Socket( int family ) : _fd( socket( family, SOCK_DGRAM, 0 ) )
 {
   if ( _fd < 0 ) {
+X();
     throw NetworkException( "socket", errno );
   }
 
@@ -203,6 +204,7 @@ void Connection::set_MTU( int family )
       MTU = DEFAULT_IPV6_MTU - IPV6_HEADER_LEN;
       break;
     default:
+X();
       throw NetworkException( "Unknown address family", 0 );
   }
 }
@@ -215,6 +217,7 @@ public:
   {
     int errcode = getaddrinfo( node, service, hints, &res );
     if ( errcode != 0 ) {
+X();
       throw NetworkException( std::string( "Bad IP address (" ) + ( node != NULL ? node : "(null)" )
                                 + "): " + gai_strerror( errcode ),
                               0 );
@@ -246,6 +249,7 @@ Connection::Connection( const char* desired_ip, const char* desired_port ) /* se
   int desired_port_high = -1;
 
   if ( desired_port && !parse_portrange( desired_port, desired_port_low, desired_port_high ) ) {
+X();
     throw NetworkException( "Invalid port range", 0 );
   }
 
@@ -267,9 +271,11 @@ Connection::Connection( const char* desired_ip, const char* desired_port ) /* se
     }
   } catch ( const NetworkException& e ) {
     fprintf( stderr, "Error binding to any interface: %s\n", e.what() );
+X();
     throw; /* this time it's fatal */
   }
 
+X();
   throw NetworkException( "Could not bind", errno );
 }
 
@@ -305,6 +311,7 @@ bool Connection::try_bind( const char* addr, int port_low, int port_high )
         local_addr.sin6.sin6_port = htons( i );
         break;
       default:
+X();
         throw NetworkException( "Unknown address family", 0 );
     }
 
@@ -332,9 +339,11 @@ bool Connection::try_bind( const char* addr, int port_low, int port_high )
                              sizeof( serv ),
                              NI_DGRAM | NI_NUMERICHOST | NI_NUMERICSERV );
   if ( errcode != 0 ) {
+X();
     throw NetworkException( std::string( "bind: getnameinfo: " ) + gai_strerror( errcode ), 0 );
   }
   fprintf( stderr, "Failed binding to %s:%s\n", host, serv );
+X();
   throw NetworkException( "bind", saved_errno );
 }
 
@@ -410,6 +419,7 @@ std::string Connection::recv( void )
       if ( ( e.the_errno == EAGAIN ) || ( e.the_errno == EWOULDBLOCK ) ) {
         continue;
       } else {
+X();
         throw;
       }
     }
@@ -418,6 +428,7 @@ std::string Connection::recv( void )
     prune_sockets();
     return payload;
   }
+X();
   throw NetworkException( "No packet received" );
 }
 
@@ -451,10 +462,12 @@ std::string Connection::recv_one( int sock_to_recv )
   ssize_t received_len = recvmsg( sock_to_recv, &header, MSG_DONTWAIT );
 
   if ( received_len < 0 ) {
+X();
     throw NetworkException( "recvmsg", errno );
   }
 
   if ( header.msg_flags & MSG_TRUNC ) {
+X();
     throw NetworkException( "Received oversize datagram", errno );
   }
 
@@ -537,6 +550,7 @@ std::string Connection::recv_one( int sock_to_recv )
                                sizeof( serv ),
                                NI_DGRAM | NI_NUMERICHOST | NI_NUMERICSERV );
     if ( errcode != 0 ) {
+X();
       throw NetworkException( std::string( "recv_one: getnameinfo: " ) + gai_strerror( errcode ), 0 );
     }
     fprintf( stderr, "Server now attached to client at %s:%s\n", host, serv );
@@ -550,12 +564,14 @@ std::string Connection::port( void ) const
   socklen_t addrlen = sizeof( local_addr );
 
   if ( getsockname( sock(), &local_addr.sa, &addrlen ) < 0 ) {
+X();
     throw NetworkException( "getsockname", errno );
   }
 
   char serv[NI_MAXSERV];
   int errcode = getnameinfo( &local_addr.sa, addrlen, NULL, 0, serv, sizeof( serv ), NI_DGRAM | NI_NUMERICSERV );
   if ( errcode != 0 ) {
+X();
     throw NetworkException( std::string( "port: getnameinfo: " ) + gai_strerror( errcode ), 0 );
   }
 
@@ -608,6 +624,7 @@ Connection::Socket::~Socket()
 Connection::Socket::Socket( const Socket& other ) : _fd( dup( other._fd ) )
 {
   if ( _fd < 0 ) {
+X();
     throw NetworkException( "socket", errno );
   }
 }
@@ -615,6 +632,7 @@ Connection::Socket::Socket( const Socket& other ) : _fd( dup( other._fd ) )
 Connection::Socket& Connection::Socket::operator=( const Socket& other )
 {
   if ( dup2( other._fd, _fd ) < 0 ) {
+X();
     throw NetworkException( "socket", errno );
   }
 

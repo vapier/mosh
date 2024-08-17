@@ -346,6 +346,7 @@ bool STMClient::process_user_input( int fd )
         if ( net.has_remote_addr() && ( !net.shutdown_in_progress() ) ) {
           overlays.get_notification_engine().set_notification_string( std::wstring( L"Exiting on user request..." ),
                                                                       true );
+_X();
           net.start_shutdown();
           return true;
         }
@@ -493,6 +494,7 @@ bool STMClient::main( void )
           break;
         } else if ( !network->shutdown_in_progress() ) {
           overlays.get_notification_engine().set_notification_string( std::wstring( L"Exiting..." ), true );
+_X();
           network->start_shutdown();
         }
       }
@@ -508,27 +510,32 @@ bool STMClient::main( void )
       if ( sel.signal( SIGTERM ) || sel.signal( SIGINT ) || sel.signal( SIGHUP ) || sel.signal( SIGPIPE ) ) {
         /* shutdown signal */
         if ( !network->has_remote_addr() ) {
+_X();
           break;
         } else if ( !network->shutdown_in_progress() ) {
           overlays.get_notification_engine().set_notification_string(
             std::wstring( L"Signal received, shutting down..." ), true );
+_X();
           network->start_shutdown();
         }
       }
 
       /* quit if our shutdown has been acknowledged */
       if ( network->shutdown_in_progress() && network->shutdown_acknowledged() ) {
+_X();
         clean_shutdown = true;
         break;
       }
 
       /* quit after shutdown acknowledgement timeout */
       if ( network->shutdown_in_progress() && network->shutdown_ack_timed_out() ) {
+_X();
         break;
       }
 
       /* quit if we received and acknowledged a shutdown request */
       if ( network->counterparty_shutdown_ack_sent() ) {
+_X();
         clean_shutdown = true;
         break;
       }
@@ -540,6 +547,7 @@ bool STMClient::main( void )
           if ( !network->shutdown_in_progress() ) {
             overlays.get_notification_engine().set_notification_string(
               std::wstring( L"Timed out waiting for server..." ), true );
+_X();
             network->start_shutdown();
           }
         } else {
@@ -571,6 +579,7 @@ bool STMClient::main( void )
       freeze_timestamp();
     } catch ( const Crypto::CryptoException& e ) {
       if ( e.fatal ) {
+X();
         throw;
       } else {
         wchar_t tmp[128];

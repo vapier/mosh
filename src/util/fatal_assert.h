@@ -35,8 +35,10 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <string.h>
+#include <errno.h>
 
-static void fatal_error( const char* expression, const char* file, int line, const char* function )
+static inline void fatal_error( const char* expression, const char* file, int line, const char* function )
 {
   fprintf( stderr,
            "Fatal assertion failure in function %s at %s:%d\nFailed test: %s\n",
@@ -48,5 +50,8 @@ static void fatal_error( const char* expression, const char* file, int line, con
 }
 
 #define fatal_assert( expr ) ( ( expr ) ? (void)0 : fatal_error( #expr, __FILE__, __LINE__, __func__ ) )
+
+#define _X(fmt, args...) fprintf(stderr, "%s:%s:%i: " fmt "\r\n", __FILE__, __func__, __LINE__, ## args)
+#define X() _X("%s", strerror(errno))
 
 #endif

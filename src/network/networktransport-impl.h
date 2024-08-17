@@ -33,6 +33,7 @@
 #ifndef NETWORK_TRANSPORT_IMPL_HPP
 #define NETWORK_TRANSPORT_IMPL_HPP
 
+#include "src/util/fatal_assert.h"
 #include "src/network/networktransport.h"
 
 #include "transportsender-impl.h"
@@ -74,6 +75,7 @@ void Transport<MyState, RemoteState>::recv( void )
     Instruction inst = fragments.get_assembly();
 
     if ( inst.protocol_version() != MOSH_PROTOCOL_VERSION ) {
+X();
       throw NetworkException( "mosh protocol version mismatch", 0 );
     }
 

@@ -36,6 +36,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "src/util/fatal_assert.h"
 #include "src/crypto/crypto.h"
 
 static void dos_detected( const char* expression, const char* file, int line, const char* function )
@@ -48,6 +49,7 @@ static void dos_detected( const char* expression, const char* file, int line, co
             file,
             line,
             expression );
+X();
   throw Crypto::CryptoException( buffer );
 }
 

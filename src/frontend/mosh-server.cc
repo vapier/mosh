@@ -705,6 +705,7 @@ static void serve( int host_fd,
 #ifdef HAVE_SYSLOG
   struct passwd* pw = getpwuid( getuid() );
   if ( pw == NULL ) {
+X();
     throw NetworkException( std::string( "serve: getpwuid: " ) + strerror( errno ), 0 );
   }
   syslog( LOG_INFO, "user %s session begin", pw->pw_name );
@@ -830,6 +831,7 @@ static void serve( int host_fd,
             int errcode
               = getnameinfo( &saved_addr.sa, saved_addr_len, host, sizeof( host ), NULL, 0, NI_NUMERICHOST );
             if ( errcode != 0 ) {
+X();
               throw NetworkException( std::string( "serve: getnameinfo: " ) + gai_strerror( errcode ), 0 );
             }
 
@@ -953,6 +955,7 @@ static void serve( int host_fd,
       spin();
     } catch ( const Crypto::CryptoException& e ) {
       if ( e.fatal ) {
+X();
         throw;
       } else {
         fprintf( stderr, "Crypto exception: %s\n", e.what() );

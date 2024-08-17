@@ -201,9 +201,11 @@ int main( int argc, char* argv[] )
       success = client.main();
     } catch ( ... ) {
       client.shutdown();
+X();
       throw;
     }
 
+_X();
     client.shutdown();
   } catch ( const Network::NetworkException& e ) {
     fprintf( stderr, "Network exception: %s\r\n", e.what() );
