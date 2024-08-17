@@ -34,8 +34,9 @@
 #define PRNG_HPP
 
 #include <cstdint>
-#include <fstream>
 #include <string>
+
+#include <unistd.h>
 
 #include "src/crypto/crypto.h"
 
@@ -43,21 +44,17 @@
 
    We rely on stdio buffering for efficiency. */
 
-static const char rdev[] = "/dev/urandom";
-
 using namespace Crypto;
 
 class PRNG
 {
 private:
-  std::ifstream randfile;
-
   /* unimplemented to satisfy -Weffc++ */
   PRNG( const PRNG& );
   PRNG& operator=( const PRNG& );
 
 public:
-  PRNG() : randfile( rdev, std::ifstream::in | std::ifstream::binary ) {}
+  PRNG() {}
 
   void fill( void* dest, size_t size )
   {
@@ -65,9 +62,8 @@ public:
       return;
     }
 
-    randfile.read( static_cast<char*>( dest ), size );
-    if ( !randfile ) {
-      throw CryptoException( "Could not read from " + std::string( rdev ) );
+    if ( getentropy(dest, size) != 0 ) {
+      throw CryptoException( "Could not random data" );
     }
   }
 
