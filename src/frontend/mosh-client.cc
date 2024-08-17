@@ -115,6 +115,8 @@ int main( int argc, char* argv[] )
   /* For security, make sure we don't dump core */
   Crypto::disable_dumping_core();
 
+close(-1);
+
   /* Detect edge case */
   fatal_assert( argc > 0 );
 
