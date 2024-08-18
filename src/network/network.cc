@@ -158,7 +158,7 @@ X();
 #ifdef HAVE_IP_MTU_DISCOVER
   int flag = IP_PMTUDISC_DONT;
   if ( setsockopt( _fd, IPPROTO_IP, IP_MTU_DISCOVER, &flag, sizeof flag ) < 0 ) {
-    perror( "setsockopt( IP_MTU_DISCOVER )" );
+    //    perror( "setsockopt( IP_MTU_DISCOVER )" );
   }
 #endif
 
