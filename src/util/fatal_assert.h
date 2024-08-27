@@ -52,6 +52,6 @@ static inline void fatal_error( const char* expression, const char* file, int li
 #define fatal_assert( expr ) ( ( expr ) ? (void)0 : fatal_error( #expr, __FILE__, __LINE__, __func__ ) )
 
 #define _X(fmt, args...) fprintf(stderr, "%s:%s:%i: " fmt "\r\n", __FILE__, __func__, __LINE__, ## args)
-#define X() _X("%s", strerror(errno))
+#define X() _X("%p:%i:%s", &errno, errno, strerror(errno))
 
 #endif
