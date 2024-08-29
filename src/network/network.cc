@@ -415,6 +415,8 @@ std::string Connection::recv( void )
     std::string payload;
     try {
       payload = recv_one( it->fd() );
+      if (payload.empty())
+        continue;
     } catch ( NetworkException& e ) {
       if ( ( e.the_errno == EAGAIN ) || ( e.the_errno == EWOULDBLOCK ) ) {
         continue;
@@ -462,6 +464,9 @@ std::string Connection::recv_one( int sock_to_recv )
   ssize_t received_len = recvmsg( sock_to_recv, &header, MSG_DONTWAIT );
 
   if ( received_len < 0 ) {
+    if (errno == EAGAIN) {
+      return "";
+    }
 X();
     throw NetworkException( "recvmsg", errno );
   }
