@@ -69,6 +69,7 @@ private:
     FD_ZERO( &all_fds );
     FD_ZERO( &read_fds );
 
+set_verbose(10);
     clear_got_signal();
     fatal_assert( 0 == sigemptyset( &empty_sigset ) );
   }
@@ -92,9 +93,10 @@ public:
       max_fd = fd;
     }
     FD_SET( fd, &all_fds );
+_X("adding fd %i", fd);
   }
 
-  void clear_fds( void ) { FD_ZERO( &all_fds ); }
+  void clear_fds( void ) { FD_ZERO( &all_fds ); _X("clearing fds"); }
 
   static void add_signal( int signum )
   {
@@ -138,6 +140,7 @@ public:
       consecutive_polls = 0;
     }
 
+X();
 #ifdef HAVE_PSELECT
     struct timespec ts;
     struct timespec* tsp = NULL;
@@ -165,7 +168,14 @@ public:
       ret = ::select( max_fd + 1, &read_fds, NULL, NULL, tvp );
       sigprocmask( SIG_SETMASK, &old_sigset, NULL );
     }
+
 #endif
+
+_X("select() = %i", ret);
+for (int i = 0; i <= max_fd; ++i) {
+  if (FD_ISSET(i, &read_fds))
+  _X("fd %i", i);
+}
 
     if ( ret == 0 || ( ret == -1 && errno == EINTR ) ) {
       /* Look for and report Cygwin select() bug. */
